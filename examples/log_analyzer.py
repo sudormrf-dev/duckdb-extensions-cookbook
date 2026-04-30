@@ -184,7 +184,12 @@ def build_error_analysis_sql(table: str) -> str:
         .build()
     )
 
-    return CTEBuilder().with_cte("hourly_errors", hourly_errors).with_cte("ranked", ranked).build(final)
+    return (
+        CTEBuilder()
+        .with_cte("hourly_errors", hourly_errors)
+        .with_cte("ranked", ranked)
+        .build(final)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -272,15 +277,18 @@ def run_analysis(logs: list[dict]) -> None:  # type: ignore[type-arg]
         import duckdb  # type: ignore[import]
 
         con = duckdb.connect()
-        con.execute("CREATE TABLE logs AS SELECT * FROM (VALUES %s) t" % ", ".join(
-            f"('{e['ts']}', '{e['method']}', '{e['endpoint']}', {e['status']}, "
-            f"{e['latency_ms']}, '{e['service']}', '{e['request_id']}', "
-            f"{'NULL' if e['user_id'] is None else e['user_id']}, {str(e['error']).lower()})"
-            for e in logs[:10]  # small sample for schema
-        ))
+        con.execute(
+            "CREATE TABLE logs AS SELECT * FROM (VALUES %s) t"
+            % ", ".join(
+                f"('{e['ts']}', '{e['method']}', '{e['endpoint']}', {e['status']}, "
+                f"{e['latency_ms']}, '{e['service']}', '{e['request_id']}', "
+                f"{'NULL' if e['user_id'] is None else e['user_id']}, {str(e['error']).lower()})"
+                for e in logs[:10]  # small sample for schema
+            )
+        )
         # Use DuckDB's JSON table function for the full dataset
         json_data = json.dumps(logs)
-        con.execute(f"DROP TABLE logs")
+        con.execute("DROP TABLE logs")
         con.execute(f"CREATE TABLE logs AS SELECT * FROM read_json_auto('{json_data}')")
 
         hourly_sql = build_hourly_aggregation_sql("logs")
@@ -309,9 +317,25 @@ def run_analysis(logs: list[dict]) -> None:  # type: ignore[type-arg]
         hourly = _simulate_hourly(logs)
         print("--- Hourly Aggregation (stdlib simulation) ---")
         _print_table(
-            ["hour", "total_requests", "error_count", "error_rate_pct", "avg_latency_ms", "p95_latency_ms"],
-            [[r["hour"], r["total_requests"], r["error_count"], r["error_rate_pct"],
-              r["avg_latency_ms"], r["p95_latency_ms"]] for r in hourly],
+            [
+                "hour",
+                "total_requests",
+                "error_count",
+                "error_rate_pct",
+                "avg_latency_ms",
+                "p95_latency_ms",
+            ],
+            [
+                [
+                    r["hour"],
+                    r["total_requests"],
+                    r["error_count"],
+                    r["error_rate_pct"],
+                    r["avg_latency_ms"],
+                    r["p95_latency_ms"],
+                ]
+                for r in hourly
+            ],
             limit=5,
         )
 
@@ -319,7 +343,10 @@ def run_analysis(logs: list[dict]) -> None:  # type: ignore[type-arg]
         print("\n--- Top 5 Endpoints (stdlib simulation) ---")
         _print_table(
             ["endpoint", "method", "requests", "errors", "avg_latency_ms"],
-            [[r["endpoint"], r["method"], r["requests"], r["errors"], r["avg_latency_ms"]] for r in top],
+            [
+                [r["endpoint"], r["method"], r["requests"], r["errors"], r["avg_latency_ms"]]
+                for r in top
+            ],
         )
 
 

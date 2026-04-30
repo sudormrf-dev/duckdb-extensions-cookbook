@@ -145,6 +145,7 @@ def bench_filter_first(orders: list[dict], customers: dict[int, dict]) -> BenchR
     Returns:
         Benchmark result.
     """
+
     def _run() -> None:
         filtered = [o for o in orders if o["status"] == "completed" and o["amount"] > 500]
         _result = [
@@ -166,6 +167,7 @@ def bench_join_first(orders: list[dict], customers: dict[int, dict]) -> BenchRes
     Returns:
         Benchmark result.
     """
+
     def _run() -> None:
         joined = [
             {**o, "tier": customers.get(o["customer_id"], {}).get("tier", "unknown")}
@@ -191,6 +193,7 @@ def bench_agg_with_pushdown(orders: list[dict]) -> BenchResult:  # type: ignore[
     Returns:
         Benchmark result.
     """
+
     def _run() -> None:
         totals: dict[str, float] = {}
         counts: dict[str, int] = {}
@@ -213,6 +216,7 @@ def bench_agg_without_pushdown(orders: list[dict]) -> BenchResult:  # type: igno
     Returns:
         Benchmark result.
     """
+
     def _run() -> None:
         # Simulate reading all columns into a new list before aggregating
         full_copy = [dict(o) for o in orders]
@@ -242,6 +246,7 @@ def bench_json_inline(orders: list[dict]) -> BenchResult:  # type: ignore[type-a
     Returns:
         Benchmark result.
     """
+
     def _run() -> None:
         _result = [json.loads(o["metadata"])["source"] for o in orders]
 
@@ -258,6 +263,7 @@ def bench_json_preparsed(orders: list[dict]) -> BenchResult:  # type: ignore[typ
     Returns:
         Benchmark result.
     """
+
     def _run() -> None:
         parsed = [json.loads(o["metadata"]) for o in orders]
         _result = [p["source"] for p in parsed]
@@ -276,7 +282,9 @@ def print_equivalent_sql() -> None:
     print("\n--- Equivalent DuckDB SQL (QueryBuilder patterns) ---\n")
 
     filter_first_sql = (
-        QueryBuilder("(SELECT * FROM orders WHERE status = 'completed' AND amount > 500) AS filtered")
+        QueryBuilder(
+            "(SELECT * FROM orders WHERE status = 'completed' AND amount > 500) AS filtered"
+        )
         .select("filtered.*", "c.tier")
         .join("customers c", "filtered.customer_id = c.customer_id")
         .build()
@@ -305,9 +313,7 @@ def print_equivalent_sql() -> None:
     print(pushdown_sql)
 
     json_inline_sql = (
-        QueryBuilder("orders")
-        .select("order_id", "metadata->>'source' AS source")
-        .build()
+        QueryBuilder("orders").select("order_id", "metadata->>'source' AS source").build()
     )
     print("\n3a. JSON inline extraction SQL (DuckDB arrow operator):")
     print(json_inline_sql)
@@ -336,15 +342,26 @@ def print_results(groups: list[tuple[BenchResult, BenchResult]], title: str) -> 
     print("  ".join("-" * w for w in col_w))
 
     for baseline, alternative in groups:
-        speedup = baseline.elapsed_ms / alternative.elapsed_ms if alternative.elapsed_ms > 0 else 1.0
+        speedup = (
+            baseline.elapsed_ms / alternative.elapsed_ms if alternative.elapsed_ms > 0 else 1.0
+        )
         direction = "faster" if speedup > 1 else "slower"
-        print(fmt.format(baseline.name, f"{baseline.rows_processed:,}", f"{baseline.elapsed_ms:.2f}", "baseline"))
-        print(fmt.format(
-            alternative.name,
-            f"{alternative.rows_processed:,}",
-            f"{alternative.elapsed_ms:.2f}",
-            f"{speedup:.2f}x {direction}",
-        ))
+        print(
+            fmt.format(
+                baseline.name,
+                f"{baseline.rows_processed:,}",
+                f"{baseline.elapsed_ms:.2f}",
+                "baseline",
+            )
+        )
+        print(
+            fmt.format(
+                alternative.name,
+                f"{alternative.rows_processed:,}",
+                f"{alternative.elapsed_ms:.2f}",
+                f"{speedup:.2f}x {direction}",
+            )
+        )
         print()
 
 

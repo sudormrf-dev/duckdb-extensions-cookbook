@@ -270,7 +270,9 @@ def _simulate_ticker_returns(records: list[dict]) -> list[dict]:  # type: ignore
     for ticker, closes in by_ticker.items():
         if len(closes) < 2:
             continue
-        returns = [100.0 * (closes[i] - closes[i - 1]) / closes[i - 1] for i in range(1, len(closes))]
+        returns = [
+            100.0 * (closes[i] - closes[i - 1]) / closes[i - 1] for i in range(1, len(closes))
+        ]
         results.append(
             {
                 "ticker": ticker,
@@ -324,12 +326,16 @@ def main() -> None:
 
     # Show SQL patterns from sql_patterns.py
     print("--- Parquet Scan SQL (build_parquet_scan) ---")
-    print(build_parquet_scan(ParquetScanConfig(
-        path="s3://my-data-lake/market/ohlcv/**/*.parquet",
-        hive_partitioning=True,
-        columns=["date", "ticker", "close", "volume"],
-        filters=["ticker IN ('AAPL', 'MSFT', 'NVDA')", "date >= '2024-01-01'"],
-    )))
+    print(
+        build_parquet_scan(
+            ParquetScanConfig(
+                path="s3://my-data-lake/market/ohlcv/**/*.parquet",
+                hive_partitioning=True,
+                columns=["date", "ticker", "close", "volume"],
+                filters=["ticker IN ('AAPL', 'MSFT', 'NVDA')", "date >= '2024-01-01'"],
+            )
+        )
+    )
 
     print("\n--- JSON Extract Expression (build_json_extract) ---")
     print(demo_json_extract_sql())
@@ -351,8 +357,18 @@ def main() -> None:
     ticker_stats = _simulate_ticker_returns(records)
     _print_table(
         ["ticker", "sector", "days", "avg_ret%", "volatility", "worst", "best"],
-        [[r["ticker"], r["sector"], r["trading_days"], r["avg_daily_return"],
-          r["volatility"], r["worst_day"], r["best_day"]] for r in ticker_stats],
+        [
+            [
+                r["ticker"],
+                r["sector"],
+                r["trading_days"],
+                r["avg_daily_return"],
+                r["volatility"],
+                r["worst_day"],
+                r["best_day"],
+            ]
+            for r in ticker_stats
+        ],
     )
 
     total_ms = (time.perf_counter() - t0) * 1000
