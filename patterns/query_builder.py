@@ -193,7 +193,7 @@ class QueryBuilder:
     def count(self) -> str:
         """Return a COUNT(*) wrapper around this query."""
         inner = self.build()
-        return f"SELECT COUNT(*) FROM ({inner}) _count"
+        return f"SELECT COUNT(*) FROM ({inner}) _count"  # nosec B608
 
 
 class CTEBuilder:

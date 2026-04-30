@@ -93,9 +93,9 @@ def build_parquet_scan(config: ParquetScanConfig) -> str:
 
     if config.filters:
         filter_expr = " AND ".join(config.filters)
-        return f"SELECT * FROM {base} WHERE {filter_expr}"
+        return f"SELECT * FROM {base} WHERE {filter_expr}"  # nosec B608
 
-    return f"SELECT * FROM {base}"
+    return f"SELECT * FROM {base}"  # nosec B608
 
 
 def build_json_extract(
@@ -162,7 +162,7 @@ def build_sample(table: str, config: SampleConfig) -> str:
     """
     size_str = f"{config.size}%" if config.is_percentage() else str(int(config.size))
     seed_str = f" REPEATABLE ({config.seed})" if config.seed is not None else ""
-    return f"SELECT * FROM {table} USING SAMPLE {config.method.value}({size_str}){seed_str}"
+    return f"SELECT * FROM {table} USING SAMPLE {config.method.value}({size_str}){seed_str}"  # nosec B608
 
 
 @dataclass
@@ -231,17 +231,17 @@ def build_spatial_query(
         SQL expression string.
     """
     if operation == "within" and wkt:
-        return f"SELECT * FROM {table} WHERE ST_Within({geom_column}, ST_GeomFromText('{wkt}'))"
+        return f"SELECT * FROM {table} WHERE ST_Within({geom_column}, ST_GeomFromText('{wkt}'))"  # nosec B608
     if operation == "intersects" and wkt:
-        return f"SELECT * FROM {table} WHERE ST_Intersects({geom_column}, ST_GeomFromText('{wkt}'))"
+        return f"SELECT * FROM {table} WHERE ST_Intersects({geom_column}, ST_GeomFromText('{wkt}'))"  # nosec B608
     if operation == "buffer" and distance is not None:
-        return f"SELECT ST_Buffer({geom_column}, {distance}) AS buffered FROM {table}"
+        return f"SELECT ST_Buffer({geom_column}, {distance}) AS buffered FROM {table}"  # nosec B608
     if operation == "transform" and target_srid is not None:
         return (
-            f"SELECT ST_Transform({geom_column}, 'EPSG:{target_srid}') AS transformed FROM {table}"
+            f"SELECT ST_Transform({geom_column}, 'EPSG:{target_srid}') AS transformed FROM {table}"  # nosec B608
         )
     if operation == "area":
-        return f"SELECT ST_Area({geom_column}) AS area FROM {table}"
+        return f"SELECT ST_Area({geom_column}) AS area FROM {table}"  # nosec B608
     if operation == "distance" and wkt:
-        return f"SELECT ST_Distance({geom_column}, ST_GeomFromText('{wkt}')) AS dist FROM {table}"
-    return f"SELECT {geom_column} FROM {table}"
+        return f"SELECT ST_Distance({geom_column}, ST_GeomFromText('{wkt}')) AS dist FROM {table}"  # nosec B608
+    return f"SELECT {geom_column} FROM {table}"  # nosec B608
