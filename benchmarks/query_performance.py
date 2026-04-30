@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import random
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from patterns.query_builder import OrderDirection, QueryBuilder
@@ -111,7 +112,7 @@ def generate_customers(n_orders: int, seed: int = 7) -> list[dict]:  # type: ign
 # ---------------------------------------------------------------------------
 
 
-def _time_fn(fn: "Callable[..., object]", repeat: int = 3) -> float:  # type: ignore[type-arg]
+def _time_fn(fn: Callable[[], None], repeat: int = 3) -> float:
     """Return median elapsed ms over *repeat* calls.
 
     Args:
