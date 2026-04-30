@@ -16,7 +16,8 @@ from __future__ import annotations
 import json
 import random
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from patterns.query_builder import CTEBuilder, OrderDirection, QueryBuilder
 
@@ -74,7 +75,7 @@ def generate_log_lines(n: int = 10_000, seed: int = 42) -> list[str]:
         List of JSON strings (one log entry per item).
     """
     rng = random.Random(seed)
-    base_ts = datetime(2024, 1, 15, 0, 0, 0, tzinfo=timezone.utc)
+    base_ts = datetime(2024, 1, 15, 0, 0, 0, tzinfo=UTC)
     lines: list[str] = []
 
     for i in range(n):
@@ -260,7 +261,7 @@ def _simulate_top_endpoints(logs: list[dict], limit: int = 5) -> list[dict]:  # 
                 "avg_latency_ms": round(float(v["total_lat"]) / req, 1) if req else 0.0,
             }
         )
-    results.sort(key=lambda r: r["requests"], reverse=True)  # type: ignore[return-value]
+    results.sort(key=lambda r: r["requests"], reverse=True)  # type: ignore[arg-type,return-value]
     return results[:limit]
 
 
@@ -274,7 +275,7 @@ def run_analysis(logs: list[dict]) -> None:  # type: ignore[type-arg]
     print(f"Loaded {len(logs):,} log entries\n")
 
     try:
-        import duckdb  # type: ignore[import]
+        import duckdb
 
         con = duckdb.connect()
         con.execute(
@@ -350,7 +351,7 @@ def run_analysis(logs: list[dict]) -> None:  # type: ignore[type-arg]
         )
 
 
-def _print_table(headers: list[str], rows: list, limit: int | None = None) -> None:
+def _print_table(headers: list[str], rows: list[Any], limit: int | None = None) -> None:
     """Print a simple aligned table to stdout.
 
     Args:

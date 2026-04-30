@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import random
 import time
-from collections.abc import Callable
+from collections.abc import Callable  # noqa: TC003
 from dataclasses import dataclass
 
 from patterns.query_builder import OrderDirection, QueryBuilder
@@ -59,7 +59,7 @@ def generate_orders(n: int = 100_000, seed: int = 7) -> list[dict]:  # type: ign
     Returns:
         List of order dicts.
     """
-    rng = random.Random(seed)
+    rng = random.Random(seed)  # noqa: S311
     rows = []
     for i in range(n):
         category = rng.choice(CATEGORIES)

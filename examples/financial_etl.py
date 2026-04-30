@@ -19,6 +19,7 @@ import json
 import random
 import time
 from datetime import date, timedelta
+from typing import Any
 
 from patterns.query_builder import CTEBuilder, OrderDirection, QueryBuilder
 from patterns.sql_patterns import (
@@ -284,7 +285,7 @@ def _simulate_ticker_returns(records: list[dict]) -> list[dict]:  # type: ignore
                 "best_day": round(max(returns), 4),
             }
         )
-    results.sort(key=lambda r: r["avg_daily_return"], reverse=True)  # type: ignore[return-value]
+    results.sort(key=lambda r: r["avg_daily_return"], reverse=True)  # type: ignore[arg-type,return-value]
     return results
 
 
@@ -293,7 +294,7 @@ def _simulate_ticker_returns(records: list[dict]) -> list[dict]:  # type: ignore
 # ---------------------------------------------------------------------------
 
 
-def _print_table(headers: list[str], rows: list, limit: int | None = None) -> None:
+def _print_table(headers: list[str], rows: list[Any], limit: int | None = None) -> None:
     """Print a simple aligned table.
 
     Args:
