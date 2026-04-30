@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Query performance benchmarks: compare DuckDB query strategies on 100,000 rows.
 
 Benchmarks:
@@ -111,7 +112,7 @@ def generate_customers(n_orders: int, seed: int = 7) -> list[dict]:  # type: ign
 # ---------------------------------------------------------------------------
 
 
-def _time_fn(fn: "function", repeat: int = 3) -> float:  # type: ignore[name-defined]
+def _time_fn(fn: object, repeat: int = 3) -> float:
     """Return median elapsed ms over *repeat* calls.
 
     Args:
