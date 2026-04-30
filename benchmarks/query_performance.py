@@ -59,7 +59,7 @@ def generate_orders(n: int = 100_000, seed: int = 7) -> list[dict]:  # type: ign
     Returns:
         List of order dicts.
     """
-    rng = random.Random(seed)  # noqa: S311
+    rng = random.Random(seed)
     rows = []
     for i in range(n):
         category = rng.choice(CATEGORIES)
